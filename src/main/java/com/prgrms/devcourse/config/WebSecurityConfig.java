@@ -40,6 +40,12 @@ public class WebSecurityConfig{
     }
 
     //로그인 가능한 사용자 계정 추가하기
+
+    /**
+     * InMemoryUserDetailsManager 객체를 사용한다면(보다 정확하게는 UserDetailsPasswordService 인터페이스 구현체) 최초 로그인 1회 성공시,
+     * {noop} 타입에서 → {bcrypt} 타입으로 PasswordEncoder가 변경된다.
+     *
+     */
     @Bean
     public InMemoryUserDetailsManager inMemoryUserDetailsManager(){
         UserDetails user = User.builder()
