@@ -44,6 +44,10 @@ public class WebSecurityConfig{
                     .invalidateHttpSession(true)
                     //로그아웃 시 SecurityContext를 초기화 (생략 가능)
                     .clearAuthentication(true)
+            )
+            .rememberMe((me) ->
+                me.rememberMeParameter("remember-me")
+                    .tokenValiditySeconds(300)
             );
 
         return http.build();
