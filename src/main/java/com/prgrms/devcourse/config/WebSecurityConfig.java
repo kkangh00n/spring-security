@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -34,6 +35,15 @@ public class WebSecurityConfig{
                 formLogin
                     .defaultSuccessUrl("/")
                     .permitAll()
+            )
+            .logout((logout) ->
+                logout
+                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                    .logoutSuccessUrl("/")
+                    //로그아웃 시 세션에서 정보 invalidate (생략 가능)
+                    .invalidateHttpSession(true)
+                    //로그아웃 시 SecurityContext를 초기화 (생략 가능)
+                    .clearAuthentication(true)
             );
 
         return http.build();
