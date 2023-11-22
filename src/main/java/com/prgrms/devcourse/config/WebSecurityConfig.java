@@ -1,14 +1,18 @@
 package com.prgrms.devcourse.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
@@ -59,7 +63,10 @@ public class WebSecurityConfig{
                 anonymous
                     .principal("thisIsAnonymousUser")
                     .authorities("ROLE_ANONYMOUS", "ROLE_UNKNOWN")
-            );
+            )
+            .exceptionHandling(handle ->
+                handle.accessDeniedHandler(accessDeniedHandler()))
+            ;
 
         return http.build();
     }
@@ -87,5 +94,20 @@ public class WebSecurityConfig{
             .roles("ADMIN")
             .build();
         return new InMemoryUserDetailsManager(user, admin);
+    }
+
+    //예외 핸들러 추가
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler(){
+        return ((request, response, accessDeniedException) -> {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Object principal = authentication != null? authentication.getPrincipal() : null;
+
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("text/plain");
+            response.getWriter().write("## ACCESS DENIED ##");
+            response.getWriter().flush();
+            response.getWriter().close();
+        });
     }
 }
