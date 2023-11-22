@@ -48,6 +48,11 @@ public class WebSecurityConfig{
             .rememberMe((me) ->
                 me.rememberMeParameter("remember-me")
                     .tokenValiditySeconds(300)
+            )
+            //HTTP 요청을 HTTPS 요청으로 리다이렉트
+            .requiresChannel(channer ->
+                channer
+                    .anyRequest().requiresSecure()
             );
 
         return http.build();
