@@ -50,9 +50,15 @@ public class WebSecurityConfig{
                     .tokenValiditySeconds(300)
             )
             //HTTP 요청을 HTTPS 요청으로 리다이렉트
-            .requiresChannel(channer ->
-                channer
+            .requiresChannel(channel ->
+                channel
                     .anyRequest().requiresSecure()
+            )
+            //Anonymous 필터 커스텀
+            .anonymous(anonymous ->
+                anonymous
+                    .principal("thisIsAnonymousUser")
+                    .authorities("ROLE_ANONYMOUS", "ROLE_UNKNOWN")
             );
 
         return http.build();
