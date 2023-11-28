@@ -3,6 +3,7 @@ package com.prgrms.devcourse.config;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -65,8 +66,9 @@ public class WebSecurityConfig{
                     .authorities("ROLE_ANONYMOUS", "ROLE_UNKNOWN")
             )
             .exceptionHandling(handle ->
-                handle.accessDeniedHandler(accessDeniedHandler()))
-            ;
+                handle.accessDeniedHandler(accessDeniedHandler())
+            )
+            .httpBasic(Customizer.withDefaults());
 
         return http.build();
     }
