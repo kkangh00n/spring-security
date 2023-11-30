@@ -1,6 +1,7 @@
 package com.prgrms.devcourse.config;
 
 import jakarta.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -11,6 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -28,6 +31,14 @@ public class WebSecurityConfig {
                 new AntPathRequestMatcher("/assets/**")
                 ,new AntPathRequestMatcher("/h2-console/**")
             );
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService(DataSource dataSource){
+        JdbcDaoImpl jdbcDao = new JdbcDaoImpl();
+        jdbcDao.setDataSource(dataSource);
+
+        return jdbcDao;
     }
 
     @Bean
