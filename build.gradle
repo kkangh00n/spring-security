@@ -27,6 +27,17 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6:3.1.1.RELEASE'
 
+    //h2
+    implementation 'com.h2database:h2:2.2.224'
+
+    //jdbc
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc:3.1.2'
+
+    //hikaricp
+    implementation 'com.zaxxer:HikariCP:5.0.1'
+
+    // https://mvnrepository.com/artifact/org.lazyluke/log4jdbc-remix
+    implementation 'org.lazyluke:log4jdbc-remix:0.2.7'
 }
 
 tasks.named('bootBuildImage') {

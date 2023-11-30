@@ -23,7 +23,11 @@ public class WebSecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         //정적 리소스에 대한 필터기능 해제
-        return (web) -> web.ignoring().requestMatchers("/assets/**");
+        return (web) -> web.ignoring()
+            .requestMatchers(
+                new AntPathRequestMatcher("/assets/**")
+                ,new AntPathRequestMatcher("/h2-console/**")
+            );
     }
 
     @Bean
@@ -32,7 +36,7 @@ public class WebSecurityConfig {
         http
             .authorizeHttpRequests((authorizeRequests) ->
                 authorizeRequests
-                    .requestMatchers("/me").hasAnyRole("USER", "ADMIN")
+                    .requestMatchers(new AntPathRequestMatcher("/me")).hasAnyRole("USER", "ADMIN")
                     .anyRequest().permitAll()
             )
 
