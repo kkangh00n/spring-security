@@ -18,7 +18,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig{
+public class WebSecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
@@ -27,7 +27,7 @@ public class WebSecurityConfig{
     }
 
     @Bean
-    protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+    protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         //시큐리티 필터 기능
         http
             .authorizeHttpRequests((authorizeRequests) ->
@@ -54,21 +54,22 @@ public class WebSecurityConfig{
                 me.rememberMeParameter("remember-me")
                     .tokenValiditySeconds(300)
             )
-            //HTTP 요청을 HTTPS 요청으로 리다이렉트
-            .requiresChannel(channel ->
-                channel
-                    .anyRequest().requiresSecure()
-            )
-            //Anonymous 필터 커스텀
-            .anonymous(anonymous ->
-                anonymous
-                    .principal("thisIsAnonymousUser")
-                    .authorities("ROLE_ANONYMOUS", "ROLE_UNKNOWN")
-            )
-            .exceptionHandling(handle ->
-                handle.accessDeniedHandler(accessDeniedHandler())
-            )
-            .httpBasic(Customizer.withDefaults());
+        //HTTP 요청을 HTTPS 요청으로 리다이렉트
+//            .requiresChannel(channel ->
+//                channel
+//                    .anyRequest().requiresSecure()
+//            )
+        //Anonymous 필터 커스텀
+//            .anonymous(anonymous ->
+//                anonymous
+//                    .principal("thisIsAnonymousUser")
+//                    .authorities("ROLE_ANONYMOUS", "ROLE_UNKNOWN")
+//            )
+//            .exceptionHandling(handle ->
+//                handle.accessDeniedHandler(accessDeniedHandler())
+//            )
+//            .httpBasic(Customizer.withDefaults());
+        ;
 
         return http.build();
     }
@@ -76,12 +77,11 @@ public class WebSecurityConfig{
     //로그인 가능한 사용자 계정 추가하기
 
     /**
-     * InMemoryUserDetailsManager 객체를 사용한다면(보다 정확하게는 UserDetailsPasswordService 인터페이스 구현체) 최초 로그인 1회 성공시,
-     * {noop} 타입에서 → {bcrypt} 타입으로 PasswordEncoder가 변경된다.
-     *
+     * InMemoryUserDetailsManager 객체를 사용한다면(보다 정확하게는 UserDetailsPasswordService 인터페이스 구현체) 최초 로그인 1회
+     * 성공시, {noop} 타입에서 → {bcrypt} 타입으로 PasswordEncoder가 변경된다.
      */
     @Bean
-    public InMemoryUserDetailsManager inMemoryUserDetailsManager(){
+    public InMemoryUserDetailsManager inMemoryUserDetailsManager() {
         UserDetails user = User.builder()
             .username("user")
             //Spring Security 5에서부터 DelegatingPasswordEncoder 클래스가 기본 Encoder로 사용됨
@@ -100,10 +100,10 @@ public class WebSecurityConfig{
 
     //예외 핸들러 추가
     @Bean
-    public AccessDeniedHandler accessDeniedHandler(){
+    public AccessDeniedHandler accessDeniedHandler() {
         return ((request, response, accessDeniedException) -> {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            Object principal = authentication != null? authentication.getPrincipal() : null;
+            Object principal = authentication != null ? authentication.getPrincipal() : null;
 
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("text/plain");
