@@ -34,14 +34,6 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(DataSource dataSource){
-        JdbcDaoImpl jdbcDao = new JdbcDaoImpl();
-        jdbcDao.setDataSource(dataSource);
-
-        return jdbcDao;
-    }
-
-    @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         //시큐리티 필터 기능
         http
@@ -95,7 +87,7 @@ public class WebSecurityConfig {
      * InMemoryUserDetailsManager 객체를 사용한다면(보다 정확하게는 UserDetailsPasswordService 인터페이스 구현체) 최초 로그인 1회
      * 성공시, {noop} 타입에서 → {bcrypt} 타입으로 PasswordEncoder가 변경된다.
      */
-    @Bean
+//    @Bean
     public InMemoryUserDetailsManager inMemoryUserDetailsManager() {
         UserDetails user = User.builder()
             .username("user")
@@ -111,6 +103,13 @@ public class WebSecurityConfig {
             .roles("ADMIN")
             .build();
         return new InMemoryUserDetailsManager(user, admin);
+    }
+
+    @Bean
+    UserDetailsService userDetailsService(DataSource dataSource){
+        JdbcDaoImpl jdbcDao = new JdbcDaoImpl();
+        jdbcDao.setDataSource(dataSource);
+        return jdbcDao;
     }
 
     //예외 핸들러 추가
