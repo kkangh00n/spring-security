@@ -1,10 +1,13 @@
 package com.prgrms.devcourse.config;
 
+import com.prgrms.devcourse.user.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -14,6 +17,8 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -22,6 +27,15 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
+
+    private final UserService userService;
+
+    AuthenticationManager authenticationManager;
+
+    @Autowired
+    public WebSecurityConfig(UserService userService) {
+        this.userService = userService;
+    }
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
@@ -35,6 +49,11 @@ public class WebSecurityConfig {
 
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        builder.userDetailsService(userService).passwordEncoder(passwordEncoder());
+        authenticationManager = builder.build();
+
         //시큐리티 필터 기능
         http
             .authorizeHttpRequests((authorizeRequests) ->
@@ -61,6 +80,7 @@ public class WebSecurityConfig {
                 me.rememberMeParameter("remember-me")
                     .tokenValiditySeconds(300)
             )
+            .authenticationManager(authenticationManager)
         //HTTP 요청을 HTTPS 요청으로 리다이렉트
 //            .requiresChannel(channel ->
 //                channel
@@ -105,11 +125,16 @@ public class WebSecurityConfig {
         return new InMemoryUserDetailsManager(user, admin);
     }
 
-    @Bean
+//    @Bean
     UserDetailsService userDetailsService(DataSource dataSource){
         JdbcDaoImpl jdbcDao = new JdbcDaoImpl();
         jdbcDao.setDataSource(dataSource);
         return jdbcDao;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
     }
 
     //예외 핸들러 추가
