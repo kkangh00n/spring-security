@@ -36,14 +36,11 @@ spring:
 #      schema-locations: classpath:sql/schema.sql
 #      data-locations: classpath:sql/data_new.sql
       encoding: UTF-8
-      mode: always
-#server:
-#  port: 443
-#  ssl:
-#    enabled: true
-#    key-alias: prgrms_keystore
-#    key-store: classpath:prgrms_keystore.p12
-#    key-store-password: prgrms123
-#    key-password: prgrms123
-#    trust-store: classpath:prgrms_truststore.p12
-#    trust-store-password: prgrms123
+server:
+  port: 8080
+jwt:
+  header: token
+  issuer: prgrms
+  client-secret: EENY5W0eegTf1naQB2eDeyCLl5kRS2b8xa5c4qLdS0hmVjtbvo8tOyhPMcAmtPuQ
+  expiry-seconds: 60
+
