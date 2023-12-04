@@ -1,5 +1,6 @@
 package com.prgrms.devcourse.config;
 
+import com.prgrms.devcourse.jwt.Jwt;
 import com.prgrms.devcourse.user.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
@@ -11,6 +12,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -28,13 +31,20 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class WebSecurityConfig {
 
-    private final UserService userService;
+    private UserService userService;
+
+    private JwtConfigure jwtConfigure;
 
     AuthenticationManager authenticationManager;
 
     @Autowired
-    public WebSecurityConfig(UserService userService) {
+    public void setUserService(UserService userService) {
         this.userService = userService;
+    }
+
+    @Autowired
+    public void setJwtConfigure(JwtConfigure jwtConfigure){
+        this.jwtConfigure = jwtConfigure;
     }
 
     @Bean
@@ -58,29 +68,19 @@ public class WebSecurityConfig {
         http
             .authorizeHttpRequests((authorizeRequests) ->
                 authorizeRequests
-                    .requestMatchers(new AntPathRequestMatcher("/me")).hasAnyRole("USER", "ADMIN")
+                    .requestMatchers(new AntPathRequestMatcher("/api/user/me")).hasAnyRole("USER", "ADMIN")
                     .anyRequest().permitAll()
             )
-
-            .formLogin((formLogin) ->
-                formLogin
-                    .defaultSuccessUrl("/")
-                    .permitAll()
+            .csrf(AbstractHttpConfigurer::disable)
+            .headers(AbstractHttpConfigurer::disable)
+            .formLogin(AbstractHttpConfigurer::disable
             )
-            .logout((logout) ->
-                logout
-                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                    .logoutSuccessUrl("/")
-                    //로그아웃 시 세션에서 정보 invalidate (생략 가능)
-                    .invalidateHttpSession(true)
-                    //로그아웃 시 SecurityContext를 초기화 (생략 가능)
-                    .clearAuthentication(true)
+            .logout(AbstractHttpConfigurer::disable
             )
-            .rememberMe((me) ->
-                me.rememberMeParameter("remember-me")
-                    .tokenValiditySeconds(300)
+            .rememberMe(AbstractHttpConfigurer::disable
             )
             .authenticationManager(authenticationManager)
+            .sessionManagement(se -> se.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         //HTTP 요청을 HTTPS 요청으로 리다이렉트
 //            .requiresChannel(channel ->
 //                channel
@@ -92,13 +92,19 @@ public class WebSecurityConfig {
 //                    .principal("thisIsAnonymousUser")
 //                    .authorities("ROLE_ANONYMOUS", "ROLE_UNKNOWN")
 //            )
-//            .exceptionHandling(handle ->
-//                handle.accessDeniedHandler(accessDeniedHandler())
-//            )
-//            .httpBasic(Customizer.withDefaults());
+            .exceptionHandling(handle ->
+                handle.accessDeniedHandler(accessDeniedHandler())
+            )
+            .httpBasic(AbstractHttpConfigurer::disable);
         ;
 
         return http.build();
+    }
+
+    @Bean
+    public Jwt jwt(){
+        return new Jwt(jwtConfigure.getIssuer(), jwtConfigure.getClientSecret(),
+            jwtConfigure.getExpirySeconds());
     }
 
     //로그인 가능한 사용자 계정 추가하기
